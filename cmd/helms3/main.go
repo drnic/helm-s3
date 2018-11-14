@@ -76,6 +76,8 @@ func main() {
 	initURI := initCmd.Arg("uri", "URI of repository, e.g. s3://awesome-bucket/charts").
 		Required().
 		String()
+	initPublishBaseURI := initCmd.Flag("publish", "Optionally use this base URI for downloads, e.g. http://awesome-bucket/charts").
+		String()
 
 	pushCmd := cli.Command(actionPush, "Push chart to the repository.")
 	pushChartPath := pushCmd.Arg("chartPath", "Path to a chart, e.g. ./epicservice-0.5.1.tgz").
@@ -125,8 +127,9 @@ func main() {
 
 	case actionInit:
 		act = initAction{
-			uri: *initURI,
-			acl: *acl,
+			uri:            *initURI,
+			acl:            *acl,
+			publishBaseURI: *initPublishBaseURI,
 		}
 		defer fmt.Printf("Initialized empty repository at %s\n", *initURI)
 

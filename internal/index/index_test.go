@@ -23,7 +23,7 @@ func TestIndex_MarshalBinary(t *testing.T) {
 
 	expected := `apiVersion: foo
 entries: null
-generated: 2018-01-01T00:00:00Z
+generated: "2018-01-01T00:00:00Z"
 `
 	if string(b) != expected {
 		t.Errorf("Expected %q but got %q", expected, string(b))
@@ -33,7 +33,7 @@ generated: 2018-01-01T00:00:00Z
 func TestIndex_UnmarshalBinary(t *testing.T) {
 	input := []byte(`apiVersion: foo
 entries: null
-generated: 2018-01-01T00:00:00Z
+generated: "2018-01-01T00:00:00Z"
 `)
 
 	idx := &Index{}
@@ -61,10 +61,14 @@ func TestIndex_AddOrReplace(t *testing.T) {
 				Version: "0.1.0",
 			},
 			"foo-0.1.0.tgz",
+			"s3://example-bucket/charts",
 			"http://example.com/charts",
 			"sha256:1234567890",
 		)
 
+		if i.Entries["foo"][0].S3URLs[0] != "s3://example-bucket/charts/foo-0.1.0.tgz" {
+			t.Errorf("Expected s3://example-bucket/charts/foo-0.1.0.tgz, got %s", i.Entries["foo"][0].S3URLs[0])
+		}
 		if i.Entries["foo"][0].URLs[0] != "http://example.com/charts/foo-0.1.0.tgz" {
 			t.Errorf("Expected http://example.com/charts/foo-0.1.0.tgz, got %s", i.Entries["foo"][0].URLs[0])
 		}
@@ -78,6 +82,7 @@ func TestIndex_AddOrReplace(t *testing.T) {
 				Version: "0.1.0",
 			},
 			"foo-0.1.0.tgz",
+			"s3://example-bucket/charts",
 			"http://example.com/charts",
 			"sha256:111",
 		)
@@ -87,11 +92,15 @@ func TestIndex_AddOrReplace(t *testing.T) {
 				Version: "0.1.1",
 			},
 			"foo-0.1.1.tgz",
+			"s3://example-bucket/charts",
 			"http://example.com/charts",
 			"sha256:222",
 		)
 		i.SortEntries()
 
+		if i.Entries["foo"][0].S3URLs[0] != "s3://example-bucket/charts/foo-0.1.1.tgz" {
+			t.Errorf("Expected s3://example-bucket/charts/foo-0.1.1.tgz, got %s", i.Entries["foo"][0].S3URLs[0])
+		}
 		if i.Entries["foo"][0].URLs[0] != "http://example.com/charts/foo-0.1.1.tgz" {
 			t.Errorf("Expected http://example.com/charts/foo-0.1.1.tgz, got %s", i.Entries["foo"][0].URLs[0])
 		}
@@ -108,6 +117,7 @@ func TestIndex_AddOrReplace(t *testing.T) {
 				Version: "0.1.0",
 			},
 			"foo-0.1.0.tgz",
+			"s3://example-bucket/charts",
 			"http://example.com/charts",
 			"sha256:111",
 		)
@@ -117,6 +127,7 @@ func TestIndex_AddOrReplace(t *testing.T) {
 				Version: "0.1.0",
 			},
 			"foo-0.1.0.tgz",
+			"s3://example-bucket/charts",
 			"http://example.com/charts",
 			"sha256:222",
 		)
@@ -125,6 +136,9 @@ func TestIndex_AddOrReplace(t *testing.T) {
 			t.Fatalf("Expected 1 entry but got %d", len(i.Entries))
 		}
 
+		if i.Entries["foo"][0].S3URLs[0] != "s3://example-bucket/charts/foo-0.1.0.tgz" {
+			t.Errorf("Expected s3://example-bucket/charts/foo-0.1.0.tgz, got %s", i.Entries["foo"][0].S3URLs[0])
+		}
 		if i.Entries["foo"][0].URLs[0] != "http://example.com/charts/foo-0.1.0.tgz" {
 			t.Errorf("Expected http://example.com/charts/foo-0.1.0.tgz, got %s", i.Entries["foo"][0].URLs[0])
 		}

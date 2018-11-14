@@ -53,10 +53,10 @@ func (act deleteAction) Run(ctx context.Context) error {
 
 	// Delete the file from S3 and replace index file.
 
-	if len(chartVersion.URLs) < 1 {
+	if len(chartVersion.S3URLs) < 1 {
 		return fmt.Errorf("chart version index record has no urls")
 	}
-	uri := chartVersion.URLs[0]
+	uri := chartVersion.S3URLs[0]
 
 	if err := storage.Delete(ctx, uri); err != nil {
 		return errors.WithMessage(err, "delete chart file from s3")

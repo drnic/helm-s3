@@ -48,22 +48,34 @@ func (idx *Index) UnmarshalBinary(data []byte) error {
 
 // AddOrReplace is the same as Add but replaces the version if it exists instead
 // of adding it to the list of versions.
-func (idx *Index) AddOrReplace(md *chart.Metadata, filename, baseURL, digest string) error {
+func (idx *Index) AddOrReplace(md *chart.Metadata, filename, s3BaseURL, publishBaseURI, digest string) error {
 	// TODO: this looks like a workaround.
 	// Think how we can rework this in the future.
 	// Ref: https://github.com/kubernetes/helm/issues/3230
 
-	u := filename
-	if baseURL != "" {
+	var s3url, url string
+	if publishBaseURI == "" {
+		publishBaseURI = s3BaseURL
+	}
+	if publishBaseURI != "" {
 		var err error
 		_, file := filepath.Split(filename)
-		u, err = urlutil.URLJoin(baseURL, file)
+		url, err = urlutil.URLJoin(publishBaseURI, file)
 		if err != nil {
-			u = filepath.Join(baseURL, file)
+			url = filepath.Join(publishBaseURI, file)
+		}
+	}
+	if s3BaseURL != "" {
+		var err error
+		_, file := filepath.Split(filename)
+		s3url, err = urlutil.URLJoin(s3BaseURL, file)
+		if err != nil {
+			s3url = filepath.Join(s3BaseURL, file)
 		}
 	}
 	cr := &repo.ChartVersion{
-		URLs:     []string{u},
+		S3URLs:   []string{s3url},
+		URLs:     []string{url},
 		Metadata: md,
 		Digest:   digest,
 		Created:  time.Now(),

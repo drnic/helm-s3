@@ -109,7 +109,7 @@ func (act pushAction) Run(ctx context.Context) error {
 		return errors.Wrap(err, "encode chart metadata to json")
 	}
 
-	exists, err := storage.Exists(ctx, repoEntry.URL+"/"+fname)
+	exists, err := storage.Exists(ctx, repoEntry.S3URL+"/"+fname)
 	if err != nil {
 		return errors.WithMessage(err, "check if chart already exists in the repository")
 	}
@@ -126,7 +126,7 @@ func (act pushAction) Run(ctx context.Context) error {
 	}
 
 	if !act.dryRun {
-		if _, err := storage.PutChart(ctx, repoEntry.URL+"/"+fname, fchart, string(serializedChartMeta), act.acl, hash, act.contentType); err != nil {
+		if _, err := storage.PutChart(ctx, repoEntry.S3URL+"/"+fname, fchart, string(serializedChartMeta), act.acl, hash, act.contentType); err != nil {
 			return errors.WithMessage(err, "upload chart to s3")
 		}
 	}
@@ -147,7 +147,7 @@ func (act pushAction) Run(ctx context.Context) error {
 		return errors.WithMessage(err, "load index from downloaded file")
 	}
 
-	if err := idx.AddOrReplace(chart.GetMetadata(), fname, repoEntry.URL, hash); err != nil {
+	if err := idx.AddOrReplace(chart.GetMetadata(), fname, repoEntry.URL, idx.PublishBaseURI, hash); err != nil {
 		return errors.WithMessage(err, "add/replace chart in the index")
 	}
 	idx.SortEntries()

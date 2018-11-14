@@ -11,12 +11,17 @@ import (
 )
 
 type initAction struct {
-	uri string
-	acl string
+	uri            string
+	acl            string
+	publishBaseURI string
 }
 
 func (act initAction) Run(ctx context.Context) error {
-	r, err := index.New().Reader()
+	index := index.New()
+	if act.publishBaseURI != "" {
+		index.PublishBaseURI = act.publishBaseURI
+	}
+	r, err := index.Reader()
 	if err != nil {
 		return errors.WithMessage(err, "get index reader")
 	}

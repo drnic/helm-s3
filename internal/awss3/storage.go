@@ -218,6 +218,7 @@ func (s *Storage) FetchRaw(ctx context.Context, uri string) ([]byte, error) {
 
 // Exists returns true if an object exists in the storage.
 func (s *Storage) Exists(ctx context.Context, uri string) (bool, error) {
+	// TODO - diff check for s3:// vs http:// vs https:// url
 	bucket, key, err := parseURI(uri)
 	if err != nil {
 		return false, err
